@@ -1,0 +1,32 @@
+# Easy Genie Desktop - Dependencies
+# Python 3.9+ required
+
+# GUI Framework
+customtkinter>=5.0.0
+
+# HTTP requests for AI services
+requests>=2.28.0
+
+# Text-to-Speech
+pyttsx3>=2.90
+
+# Speech Recognition
+SpeechRecognition>=3.10.0
+pyaudio>=0.2.11
+
+# Audio processing and ambient sounds
+pygame>=2.5.0
+
+# Export functionality
+reportlab>=3.6.0
+python-docx>=0.8.11
+
+# Image processing
+Pillow>=9.0.0
+
+# Numerical operations
+numpy>=1.24.0
+
+# Additional utilities
+tkinter-tooltip>=2.0.0
+psutil>=5.9.0

@@ -1,0 +1,245 @@
+{
+  "app_name": "Easy Genie Desktop",
+  "app_description": "Assistant de Bureau Alimenté par l'IA",
+  "created_by": "Créé par : Geoffroy Streit",
+  
+  "menu": {
+    "file": "Fichier",
+    "edit": "Édition",
+    "view": "Affichage",
+    "tools": "Outils",
+    "settings": "Paramètres",
+    "help": "Aide",
+    "language": "Langue",
+    "exit": "Quitter"
+  },
+  
+  "buttons": {
+    "ok": "OK",
+    "cancel": "Annuler",
+    "apply": "Appliquer",
+    "close": "Fermer",
+    "save": "Enregistrer",
+    "load": "Charger",
+    "delete": "Supprimer",
+    "edit": "Modifier",
+    "add": "Ajouter",
+    "remove": "Retirer",
+    "browse": "Parcourir",
+    "reset": "Réinitialiser",
+    "refresh": "Actualiser",
+    "start": "Démarrer",
+    "stop": "Arrêter",
+    "pause": "Pause",
+    "resume": "Reprendre",
+    "next": "Suivant",
+    "previous": "Précédent",
+    "finish": "Terminer"
+  },
+  
+  "tools": {
+    "brain_dump": "Vidage Mental",
+    "brain_dump_desc": "Capturez et organisez vos pensées",
+    "formalizer": "Formalisateur",
+    "formalizer_desc": "Transformez le texte informel en contenu professionnel",
+    "immersive_reader": "Lecteur Immersif",
+    "immersive_reader_desc": "Expérience de lecture améliorée avec assistance IA",
+    "priority_grid": "Grille de Priorités",
+    "priority_grid_desc": "Organisez les tâches par importance et urgence",
+    "routine_builder": "Constructeur de Routines",
+    "routine_builder_desc": "Créez et gérez vos routines quotidiennes",
+    "task_breaker": "Diviseur de Tâches",
+    "task_breaker_desc": "Divisez les tâches complexes en étapes gérables",
+    "time_focus": "Focus Temporel",
+    "time_focus_desc": "Minuteur Pomodoro et gestion de la concentration"
+  },
+  
+  "status": {
+    "ready": "Prêt",
+    "loading": "Chargement...",
+    "saving": "Enregistrement...",
+    "processing": "Traitement...",
+    "connecting": "Connexion...",
+    "connected": "Connecté",
+    "disconnected": "Déconnecté",
+    "error": "Erreur",
+    "success": "Succès",
+    "warning": "Avertissement",
+    "info": "Information"
+  },
+  
+  "messages": {
+    "welcome": "Bienvenue dans Easy Genie Desktop !",
+    "goodbye": "Merci d'avoir utilisé Easy Genie Desktop !",
+    "save_success": "Fichier enregistré avec succès",
+    "save_error": "Erreur lors de l'enregistrement du fichier",
+    "load_success": "Fichier chargé avec succès",
+    "load_error": "Erreur lors du chargement du fichier",
+    "delete_confirm": "Êtes-vous sûr de vouloir supprimer cet élément ?",
+    "unsaved_changes": "Vous avez des modifications non enregistrées. Voulez-vous enregistrer avant de fermer ?",
+    "operation_cancelled": "Opération annulée",
+    "invalid_input": "Entrée invalide fournie",
+    "file_not_found": "Fichier non trouvé",
+    "permission_denied": "Permission refusée",
+    "network_error": "Erreur de connexion réseau",
+    "ai_service_error": "Service IA temporairement indisponible",
+    "clear_confirm": "Êtes-vous sûr de vouloir effacer tout le contenu ?"
+  },
+  
+  "settings": {
+    "general": "Général",
+    "appearance": "Apparence",
+    "language_settings": "Langue",
+    "ai_settings": "Paramètres IA",
+    "voice_settings": "Paramètres Vocaux",
+    "audio_settings": "Paramètres Audio",
+    "security_settings": "Sécurité",
+    "advanced": "Avancé",
+    "theme": "Thème",
+    "dark_mode": "Mode Sombre",
+    "light_mode": "Mode Clair",
+    "auto_save": "Sauvegarde Automatique",
+    "notifications": "Notifications",
+    "startup_behavior": "Comportement au Démarrage",
+    "default_tool": "Outil par Défaut"
+  },
+  
+  "voice": {
+    "listening": "Écoute...",
+    "processing_speech": "Traitement de la parole...",
+    "speak_now": "Parlez maintenant",
+    "voice_command_received": "Commande vocale reçue",
+    "voice_not_recognized": "Voix non reconnue, veuillez réessayer",
+    "microphone_error": "Erreur d'accès au microphone",
+    "voice_disabled": "Commandes vocales désactivées",
+    "record": "Enregistrer",
+    "stop_recording": "Arrêter",
+    "sample_transcription": "Ceci est un exemple de transcription d'entrée vocale."
+  },
+  
+  "ai": {
+    "thinking": "L'IA réfléchit...",
+    "generating_response": "Génération de la réponse...",
+    "ai_response": "Réponse IA",
+    "ai_error": "Erreur du service IA",
+    "context_cleared": "Contexte de conversation effacé",
+    "model_changed": "Modèle IA changé pour {model}",
+    "tokens_used": "Jetons utilisés : {count}"
+  },
+  
+  "export": {
+    "export_data": "Exporter les Données",
+    "import_data": "Importer les Données",
+    "export_format": "Format d'Exportation",
+    "export_location": "Emplacement d'Exportation",
+    "export_success": "Données exportées avec succès vers {location}",
+    "export_error": "Erreur lors de l'exportation des données",
+    "import_success": "Données importées avec succès",
+    "import_error": "Erreur lors de l'importation des données",
+    "select_file": "Sélectionner le fichier à importer",
+    "supported_formats": "Formats supportés : {formats}"
+  },
+  
+  "security": {
+    "login": "Connexion",
+    "logout": "Déconnexion",
+    "username": "Nom d'utilisateur",
+    "password": "Mot de passe",
+    "login_success": "Connexion réussie",
+    "login_failed": "Échec de la connexion",
+    "access_denied": "Accès refusé",
+    "session_expired": "Session expirée, veuillez vous reconnecter",
+    "password_changed": "Mot de passe modifié avec succès",
+    "weak_password": "Le mot de passe est trop faible",
+    "account_locked": "Compte verrouillé en raison de multiples tentatives échouées"
+  },
+  
+  "notifications": {
+    "new_notification": "Nouvelle notification",
+    "mark_as_read": "Marquer comme lu",
+    "clear_all": "Tout effacer",
+    "notification_settings": "Paramètres de Notification",
+    "enable_notifications": "Activer les notifications",
+    "sound_notifications": "Notifications sonores",
+    "desktop_notifications": "Notifications de bureau"
+  },
+  
+  "errors": {
+    "unexpected_error": "Une erreur inattendue s'est produite",
+    "file_error": "Erreur d'opération de fichier",
+    "network_timeout": "Délai d'attente réseau dépassé",
+    "invalid_format": "Format de fichier invalide",
+    "insufficient_permissions": "Permissions insuffisantes",
+    "service_unavailable": "Service temporairement indisponible",
+    "configuration_error": "Erreur de configuration",
+    "dependency_missing": "Dépendance requise manquante"
+  },
+  
+  "time": {
+    "seconds": "secondes",
+    "minutes": "minutes",
+    "hours": "heures",
+    "days": "jours",
+    "weeks": "semaines",
+    "months": "mois",
+    "years": "années",
+    "today": "Aujourd'hui",
+    "yesterday": "Hier",
+    "tomorrow": "Demain",
+    "now": "Maintenant",
+    "never": "Jamais",
+    "always": "Toujours"
+  },
+  
+  "ui_components": {
+    "yes": "Oui",
+    "no": "Non",
+    "search_placeholder": "Rechercher...",
+    "no_results": "Aucun résultat trouvé",
+    "loading_more": "Chargement...",
+    "show_more": "Afficher plus",
+    "show_less": "Afficher moins",
+    "expand": "Développer",
+    "collapse": "Réduire",
+    "select_all": "Tout sélectionner",
+    "deselect_all": "Tout désélectionner",
+    "copy": "Copier",
+    "paste": "Coller",
+    "cut": "Couper",
+    "undo": "Annuler",
+    "redo": "Refaire",
+    "title": "Titre",
+    "category": "Catégorie",
+    "tags": "Étiquettes",
+    "all_files": "Tous les Fichiers",
+    "input_dialog": "Saisie"
+  },
+  "brain_dump": {
+    "title_placeholder": "Titre de votre décharge...",
+    "tags_placeholder": "tag1, tag2, tag3...",
+    "quick_actions": "Actions Rapides",
+    "content": "Contenu",
+    "word_count": "Mots : {count}",
+    "file_operations": "Opérations de Fichier",
+    "ai_analysis": "Analyse IA",
+    "analyze": "Analyser",
+    "organize": "Organiser",
+    "save_title": "Sauvegarder la Décharge",
+    "load_title": "Charger une Décharge",
+    "json_files": "Fichiers JSON",
+    "no_content_to_analyze": "Aucun contenu à analyser",
+    "no_content_to_organize": "Aucun contenu à organiser",
+    "analysis_feature_coming_soon": "Fonctionnalité d'analyse bientôt disponible !",
+    "organize_feature_coming_soon": "Fonctionnalité d'organisation bientôt disponible !",
+    "export_feature_coming_soon": "Fonctionnalité d'export bientôt disponible !"
+  },
+  "categories": {
+    "general": "Général",
+    "ideas": "Idées",
+    "projects": "Projets",
+    "reflections": "Réflexions",
+    "notes": "Notes",
+    "creative": "Créatif",
+    "problems": "Problèmes"
+  }
+}

@@ -1,0 +1,362 @@
+# Easy Genie Desktop - Phase 2 Configuration
+# This file contains all configurable settings for the application
+
+# Application Settings
+app:
+  name: "Easy Genie Desktop - Phase 2"
+  version: "2.0.0"
+  debug: false
+  log_level: "INFO"  # DEBUG, INFO, WARNING, ERROR, CRITICAL
+  data_dir: "data"
+  logs_dir: "logs"
+  themes_dir: "themes"
+  exports_dir: "exports"
+  temp_dir: "temp"
+
+# UI Settings
+ui:
+  theme:
+    mode: "system"  # light, dark, system
+    default_theme: "blue"
+    custom_themes_enabled: true
+  
+  window:
+    width: 1400
+    height: 900
+    min_width: 1000
+    min_height: 700
+    resizable: true
+    center_on_startup: true
+  
+  animations:
+    enabled: true
+    duration: 300  # milliseconds
+    easing: "ease_in_out"
+  
+  fonts:
+    default_family: "Segoe UI"
+    default_size: 12
+    heading_family: "Segoe UI"
+    heading_size: 18
+    monospace_family: "Consolas"
+    monospace_size: 11
+
+# AI Service Configuration
+ai:
+  default_provider: "openai"  # openai, anthropic, huggingface, local
+  mode: "hybrid"  # single, hybrid, load_balanced
+  learning_mode: "active"  # passive, active, disabled
+  
+  providers:
+    openai:
+      enabled: true
+      model: "gpt-4"
+      max_tokens: 4000
+      temperature: 0.7
+      timeout: 30
+    
+    anthropic:
+      enabled: true
+      model: "claude-3-sonnet-20240229"
+      max_tokens: 4000
+      temperature: 0.7
+      timeout: 30
+    
+    huggingface:
+      enabled: false
+      model: "microsoft/DialoGPT-large"
+      max_tokens: 2000
+      timeout: 60
+    
+    local:
+      enabled: false
+      model_path: "models/local_model"
+      device: "auto"  # cpu, cuda, auto
+  
+  caching:
+    enabled: true
+    max_size: 1000  # number of cached responses
+    ttl: 3600  # seconds
+  
+  context:
+    max_history: 20  # number of previous messages to remember
+    context_window: 8000  # tokens
+
+# Voice System Configuration
+voice:
+  recognition:
+    engine: "google"  # google, azure, whisper, sphinx
+    language: "en-US"
+    timeout: 5  # seconds
+    phrase_timeout: 1  # seconds
+    energy_threshold: 300
+    dynamic_energy_threshold: true
+  
+  synthesis:
+    engine: "pyttsx3"  # pyttsx3, azure, google
+    voice_id: null  # null for default
+    rate: 200  # words per minute
+    volume: 0.8  # 0.0 to 1.0
+  
+  wake_word:
+    enabled: true
+    phrase: "hey genie"
+    sensitivity: 0.5  # 0.0 to 1.0
+  
+  commands:
+    enabled: true
+    timeout: 10  # seconds
+    confirmation_required: false
+
+# Audio System Configuration
+audio:
+  playback:
+    enabled: true
+    default_device: null  # null for system default
+    sample_rate: 44100
+    channels: 2
+    buffer_size: 1024
+  
+  recording:
+    enabled: true
+    default_device: null  # null for system default
+    sample_rate: 44100
+    channels: 1
+    format: "wav"
+    quality: "high"  # low, medium, high
+  
+  effects:
+    noise_reduction: true
+    echo_cancellation: true
+    auto_gain_control: true
+
+# Database Configuration
+database:
+  main:
+    path: "data/main.db"
+    enable_wal_mode: true
+    enable_foreign_keys: true
+    connection_timeout: 30
+    backup_enabled: true
+    backup_interval: 24  # hours
+  
+  analytics:
+    path: "data/analytics.db"
+    retention_days: 90
+    enable_compression: true
+  
+  security:
+    path: "data/security.db"
+    encryption_enabled: true
+    retention_days: 365
+
+# Export System Configuration
+export:
+  default_format: "pdf"
+  output_directory: "exports"
+  
+  formats:
+    pdf:
+      quality: "high"
+      compression: true
+      password_protection: false
+    
+    excel:
+      format: "xlsx"
+      include_charts: true
+      auto_fit_columns: true
+    
+    csv:
+      delimiter: ","
+      encoding: "utf-8"
+      include_headers: true
+  
+  templates:
+    enabled: true
+    directory: "templates"
+    custom_templates: true
+
+# Notification System Configuration
+notifications:
+  enabled: true
+  
+  channels:
+    toast:
+      enabled: true
+      duration: 5  # seconds
+      position: "bottom_right"
+    
+    system_tray:
+      enabled: true
+      show_icon: true
+    
+    in_app:
+      enabled: true
+      max_queue_size: 10
+      auto_dismiss: true
+    
+    email:
+      enabled: false
+      smtp_server: "smtp.gmail.com"
+      smtp_port: 587
+      use_tls: true
+    
+    sound:
+      enabled: true
+      volume: 0.5
+      sound_file: null  # null for system default
+  
+  priority_levels:
+    urgent:
+      all_channels: true
+      persistent: true
+    high:
+      toast: true
+      in_app: true
+    normal:
+      toast: true
+    low:
+      in_app: true
+  
+  quiet_hours:
+    enabled: false
+    start_time: "22:00"
+    end_time: "08:00"
+    emergency_override: true
+
+# Analytics Configuration
+analytics:
+  enabled: true
+  
+  collection:
+    user_events: true
+    performance_metrics: true
+    error_tracking: true
+    feature_usage: true
+  
+  privacy:
+    anonymize_data: true
+    data_retention_days: 90
+    opt_out_available: true
+  
+  reporting:
+    auto_generate: true
+    report_interval: "weekly"  # daily, weekly, monthly
+    include_charts: true
+
+# Security Configuration
+security:
+  authentication:
+    required: false  # Set to true for production
+    method: "password"  # password, biometric, token
+    session_timeout: 3600  # seconds
+    max_failed_attempts: 5
+    lockout_duration: 300  # seconds
+  
+  encryption:
+    algorithm: "AES-256"
+    key_derivation: "PBKDF2"
+    iterations: 100000
+  
+  permissions:
+    role_based: true
+    default_role: "user"
+    admin_required_for:
+      - "system_settings"
+      - "user_management"
+      - "security_logs"
+  
+  monitoring:
+    enabled: true
+    log_failed_attempts: true
+    detect_suspicious_activity: true
+    alert_on_security_events: true
+  
+  data_protection:
+    encrypt_sensitive_data: true
+    secure_deletion: true
+    backup_encryption: true
+
+# Tool-Specific Settings
+tools:
+  ai_chat:
+    max_conversation_length: 100
+    auto_save_conversations: true
+    export_format: "markdown"
+    enable_code_highlighting: true
+  
+  voice_assistant:
+    continuous_listening: false
+    voice_feedback: true
+    command_confirmation: false
+    learning_enabled: true
+  
+  document_processor:
+    supported_formats: ["pdf", "docx", "txt", "md"]
+    max_file_size: 50  # MB
+    ocr_enabled: true
+    batch_processing: true
+  
+  media_converter:
+    supported_formats: ["mp3", "wav", "mp4", "avi", "mov"]
+    max_file_size: 500  # MB
+    quality_presets: ["low", "medium", "high", "lossless"]
+    parallel_processing: true
+  
+  system_optimizer:
+    auto_scan_interval: 24  # hours
+    safe_mode: true
+    backup_before_changes: true
+    real_time_monitoring: false
+  
+  automation_builder:
+    max_automations: 50
+    enable_scheduling: true
+    allow_system_commands: false
+    sandbox_mode: true
+  
+  smart_organizer:
+    auto_organize: false
+    duplicate_detection: true
+    ai_categorization: true
+    backup_before_organize: true
+
+# Performance Settings
+performance:
+  threading:
+    max_workers: 4
+    enable_async: true
+  
+  caching:
+    enabled: true
+    max_memory_usage: 512  # MB
+    cleanup_interval: 3600  # seconds
+  
+  optimization:
+    lazy_loading: true
+    image_compression: true
+    database_optimization: true
+  
+  monitoring:
+    enabled: true
+    cpu_threshold: 80  # percent
+    memory_threshold: 80  # percent
+    disk_threshold: 90  # percent
+
+# Development Settings (only used in debug mode)
+development:
+  hot_reload: false
+  mock_ai_responses: false
+  disable_analytics: false
+  verbose_logging: true
+  profiling_enabled: false
+  test_mode: false
+
+# Feature Flags
+features:
+  experimental_ui: false
+  beta_voice_commands: false
+  advanced_analytics: true
+  cloud_sync: false
+  plugin_system: false
+  multi_language: false
