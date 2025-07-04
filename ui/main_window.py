@@ -22,7 +22,7 @@ try:
     from ..core.ai_service import AIServiceManager
     from ..core.audio_service import AudioServiceManager
     from ..core.export_service import ExportServiceManager
-    from ..config.settings import SettingsManager
+    from ..config.settings import AppSettings
     from ..config.themes import ThemeManager
     from ..config.ai_config import AIProvider
 except ImportError:
@@ -33,7 +33,7 @@ except ImportError:
     from core.ai_service import AIServiceManager
     from core.audio_service import AudioServiceManager
     from core.export_service import ExportServiceManager
-    from config.settings import SettingsManager
+    from config.settings import AppSettings
     from config.themes import ThemeManager
     from config.ai_config import AIProvider
 
@@ -41,23 +41,21 @@ except ImportError:
 class MainWindow:
     """Main application window for Easy Genie Desktop."""
     
-    def __init__(self, settings_manager: SettingsManager, 
-                 database_manager: DatabaseManager,
-                 ai_service: AIServiceManager,
-                 audio_service: AudioServiceManager,
-                 export_service: ExportServiceManager):
+    def __init__(self, database_manager: DatabaseManager, settings_manager: AppSettings):
         """Initialize main window."""
         self.logger = logging.getLogger(__name__)
         
         # Core services
         self.settings_manager = settings_manager
         self.database_manager = database_manager
-        self.ai_service = ai_service
-        self.audio_service = audio_service
-        self.export_service = export_service
+        
+        # Initialize other services
+        self.ai_service = AIServiceManager(settings_manager)
+        self.audio_service = AudioServiceManager(settings_manager)
+        self.export_service = ExportServiceManager(settings_manager)
         
         # Theme manager
-        self.theme_manager = ThemeManager(settings_manager)
+        self.theme_manager = ThemeManager()
         
         # Window state
         self.current_tool = None
@@ -252,13 +250,10 @@ class MainWindow:
         user_frame = ctk.CTkFrame(self.sidebar)
         user_frame.grid(row=2, column=0, sticky="ew", padx=10, pady=5)
         
-        # Load current user
-        users = self.database_manager.get_users()
-        if users:
-            self.current_user = users[0]  # Use first user for now
-            user_text = f"👤 {self.current_user['name']}"
-        else:
-            user_text = "👤 Utilisateur Invité"
+        # Load current user (simplified for now)
+        # TODO: Implement proper user management
+        self.current_user = None
+        user_text = "👤 Utilisateur Invité"
         
         user_label = ctk.CTkLabel(
             user_frame, 
@@ -320,8 +315,6 @@ class MainWindow:
                 command=command
             )
             btn.pack(fill="x", padx=5, pady=2)
-        
-        actions_frame.pack_configure(pady=(5, 10))
     
     def _create_tools_navigation(self):
         """Create tools navigation section."""
@@ -577,16 +570,17 @@ class MainWindow:
         )
         recent_title.pack(pady=(15, 10))
         
-        # Get recent tasks
-        recent_tasks = self.database_manager.get_recent_tasks(limit=5)
+        # Get recent tasks (simplified for now)
+        # TODO: Implement proper task management
+        recent_tasks = []  # Placeholder
         
         if recent_tasks:
             for task in recent_tasks:
                 task_frame = ctk.CTkFrame(recent_frame, fg_color="transparent")
                 task_frame.pack(fill="x", padx=15, pady=2)
                 
-                status_icon = "✅" if task['status'] == 'completed' else "⏳"
-                task_text = f"{status_icon} {task['title'][:40]}..."
+                status_icon = "✅" if task.get('status') == 'completed' else "⏳"
+                task_text = f"{status_icon} {task.get('title', 'Tâche')[:40]}..."
                 
                 task_label = ctk.CTkLabel(
                     task_frame,
@@ -651,8 +645,9 @@ class MainWindow:
         self.status_label.grid(row=0, column=0, padx=10, pady=5, sticky="w")
         
         # AI status
-        ai_status = "IA Connectée" if self.ai_service.is_configured() else "IA Non Configurée"
-        ai_color = "green" if self.ai_service.is_configured() else "orange"
+        ai_configured = self.ai_service.current_provider.value != 'none'
+        ai_status = "IA Connectée" if ai_configured else "IA Non Configurée"
+        ai_color = "green" if ai_configured else "orange"
         
         self.ai_status_label = ctk.CTkLabel(
             self.status_bar,
@@ -744,9 +739,25 @@ class MainWindow:
         try:
             self.set_status(f"Ouverture de {self.tools[tool_id]['name']}...")
             
-            # TODO: Import and open specific tool windows
-            # For now, show placeholder
-            self._show_tool_placeholder(tool_id)
+            # Clear content area
+            for widget in self.content_area.winfo_children():
+                widget.destroy()
+            
+            # Import and instantiate the specific tool
+            if tool_id == 'brain_dump':
+                from ui.tools.brain_dump import BrainDumpTool
+                tool = BrainDumpTool(
+                    parent=self.content_area,
+                    ai_service=self.ai_service,
+                    database_manager=self.database_manager,
+                    audio_service=self.audio_service,
+                    settings_manager=self.settings_manager,
+                    theme_manager=self.theme_manager
+                )
+                tool.grid(row=0, column=0, sticky="nsew", padx=10, pady=10)
+            else:
+                # For other tools, show placeholder for now
+                self._show_tool_placeholder(tool_id)
             
             self.logger.info(f"Opened tool: {tool_id}")
             
@@ -835,8 +846,7 @@ class MainWindow:
     def _quick_brain_dump(self):
         """Quick brain dump."""
         self.set_status("Ouverture de la décharge de pensées...")
-        # TODO: Open brain dump tool
-        messagebox.showinfo("Info", "Fonctionnalité en développement")
+        self._open_tool('brain_dump')
     
     def _quick_focus_session(self):
         """Quick focus session."""

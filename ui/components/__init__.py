@@ -8,8 +8,8 @@ Reusable UI components for the Easy Genie Desktop application.
 
 # Import all components
 from .base_components import *
-from .dialogs import *
-from .widgets import *
+from .reusable_dialogs import *
+from .widget_factory import *
 
 __all__ = [
     # Base components
@@ -18,14 +18,16 @@ __all__ = [
     'BaseToolWindow',
     
     # Dialogs
-    'SettingsDialog',
-    'ExportDialog',
-    'ProfileDialog',
+    'BaseDialog',
+    'show_confirmation',
+    'show_input',
+    'show_message',
     
     # Widgets
-    'EnergyIndicator',
-    'StatusBar',
-    'ToolCard',
-    'TaskCard',
-    'ProgressIndicator'
+    'WidgetFactory',
+    'get_widget_factory',
+    'create_button',
+    'create_label',
+    'create_entry',
+    'create_frame'
 ]

@@ -1102,8 +1102,59 @@ Réponds avec le texte réorganisé, prêt à remplacer l'original.
             messagebox.showwarning("Rien à Exporter", "Aucun contenu à exporter.")
             return
         
-        # TODO: Implement export functionality
-        messagebox.showinfo("Info", "Export en développement")
+        try:
+            # Get save location
+            filepath = filedialog.asksaveasfilename(
+                title="Exporter Brain Dump",
+                defaultextension=".txt",
+                filetypes=[
+                    ("Text files", "*.txt"),
+                    ("Markdown files", "*.md"),
+                    ("JSON files", "*.json"),
+                    ("All files", "*.*")
+                ]
+            )
+            
+            if not filepath:
+                return
+            
+            # Prepare export content
+            export_content = f"""
+Titre: {self.current_dump['title'] or 'Sans titre'}
+Catégorie: {self.current_dump['category']}
+Tags: {', '.join(self.current_dump['tags'])}
+Date de création: {self.current_dump['created_at']}
+Mots: {self.current_dump['word_count']}
+
+{'='*50}
+
+{self.current_dump['content']}
+"""
+            
+            # Export based on file extension
+            if filepath.endswith('.json'):
+                with open(filepath, 'w', encoding='utf-8') as f:
+                    json.dump(self.current_dump, f, ensure_ascii=False, indent=2)
+            elif filepath.endswith('.md'):
+                md_content = f"# {self.current_dump['title'] or 'Brain Dump'}\n\n"
+                md_content += f"**Catégorie:** {self.current_dump['category']}\n"
+                md_content += f"**Tags:** {', '.join(self.current_dump['tags'])}\n"
+                md_content += f"**Date:** {self.current_dump['created_at']}\n\n"
+                md_content += "---\n\n"
+                md_content += self.current_dump['content']
+                
+                with open(filepath, 'w', encoding='utf-8') as f:
+                    f.write(md_content)
+            else:
+                with open(filepath, 'w', encoding='utf-8') as f:
+                    f.write(export_content)
+            
+            self.status_label.configure(text=f"📤 Exporté: {filepath.split('/')[-1]}")
+            messagebox.showinfo("Export", f"Dump exporté avec succès:\n{filepath}")
+            
+        except Exception as e:
+            self.logger.error(f"Export failed: {e}")
+            messagebox.showerror("Erreur", f"Échec de l'export: {e}")
     
     def _share_dump(self):
         """Share the current dump."""
@@ -1111,8 +1162,34 @@ Réponds avec le texte réorganisé, prêt à remplacer l'original.
             messagebox.showwarning("Rien à Partager", "Aucun contenu à partager.")
             return
         
-        # TODO: Implement sharing functionality
-        messagebox.showinfo("Info", "Partage en développement")
+        try:
+            # Prepare share content
+            share_content = f"""
+📝 {self.current_dump['title'] or 'Brain Dump'}
+
+📁 Catégorie: {self.current_dump['category']}
+🏷️ Tags: {', '.join(self.current_dump['tags'])}
+📅 Date: {datetime.now().strftime('%d/%m/%Y %H:%M')}
+
+{self.current_dump['content']}
+
+---
+Partagé depuis Easy Genie Desktop
+"""
+            
+            # Copy to clipboard
+            self.clipboard_clear()
+            self.clipboard_append(share_content)
+            
+            self.status_label.configure(text="📋 Copié dans le presse-papiers")
+            messagebox.showinfo(
+                "Partage", 
+                "Contenu copié dans le presse-papiers.\n\nVous pouvez maintenant le coller dans:\n• Email\n• Chat\n• Document\n• Réseaux sociaux"
+            )
+            
+        except Exception as e:
+            self.logger.error(f"Share failed: {e}")
+            messagebox.showerror("Erreur", f"Échec du partage: {e}")
     
     def _save_data(self):
         """Save current dump data."""

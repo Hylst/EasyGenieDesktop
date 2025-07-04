@@ -627,7 +627,7 @@ Provide:
         
         # Add relevant history
         if context.history:
-            recent_tasks = [h for h in context.history[-5:] if h.get("tool_name") == config.tool_name if config else True]
+            recent_tasks = [h for h in context.history[-5:] if (h.get("tool_name") == config.tool_name if config else True)]
             if recent_tasks:
                 history_prefix = self.optimization_rules["context_injection_patterns"]["history"]
                 similar_tasks = ", ".join([task.get("description", "similar task") for task in recent_tasks[:3]])

@@ -343,3 +343,15 @@ class AIConfig:
             "mode": "disabled",
             "description": "Feature disabled without AI"
         })
+
+
+# Global instances and constants for backward compatibility
+_ai_config = AIConfig()
+
+# Export provider configurations as constants
+AI_PROVIDERS = _ai_config.providers
+AI_MODELS = {provider: config["models"] for provider, config in _ai_config.providers.items()}
+AI_FEATURES = _ai_config.tool_features
+
+# Export the main configuration instance
+ai_config = _ai_config
