@@ -132,6 +132,10 @@ class AppSettings:
             self.logger.error(f"Failed to save settings: {e}")
             return False
     
+    def save_settings(self) -> bool:
+        """Alias for save() method for backward compatibility."""
+        return self.save()
+    
     def get(self, key: str, default: Any = None) -> Any:
         """Get a setting value."""
         return self.settings.get(key, default)

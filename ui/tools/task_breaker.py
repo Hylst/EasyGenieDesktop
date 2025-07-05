@@ -9,7 +9,7 @@ Supports both Magic (simple) and Genie (AI-powered) modes.
 
 import logging
 import tkinter as tk
-from tkinter import ttk, messagebox, filedialog
+from tkinter import ttk, messagebox, filedialog, simpledialog
 import customtkinter as ctk
 from typing import Dict, List, Optional, Any
 import json
@@ -46,7 +46,24 @@ class TaskBreakerTool(BaseToolWindow):
         # Task data
         self.current_task = None
         self.subtasks = []
-        self.templates = self._load_templates()
+        
+        # Initialize templates with fallback
+        try:
+            self.templates = self._load_templates()
+        except Exception as e:
+            self.logger.error(f"Failed to load templates: {e}")
+            self.templates = {
+                "Projet Simple": [
+                    "Définir les objectifs",
+                    "Planifier les étapes",
+                    "Exécuter le projet",
+                    "Réviser et finaliser"
+                ]
+            }
+        
+        # Ensure templates is always a valid dict
+        if not isinstance(self.templates, dict):
+            self.templates = {}
         
         # UI state
         self.selected_subtask = None
@@ -96,7 +113,6 @@ class TaskBreakerTool(BaseToolWindow):
         
         self.task_title_entry = ctk.CTkEntry(
             title_frame,
-            placeholder_text="Ex: Organiser un événement d'entreprise",
             height=35
         )
         self.task_title_entry.pack(fill="x", pady=(5, 0))
@@ -110,8 +126,7 @@ class TaskBreakerTool(BaseToolWindow):
         
         self.task_desc_text = ctk.CTkTextbox(
             desc_frame,
-            height=120,
-            placeholder_text="Décrivez votre tâche en détail...\n\nPlus vous donnez de détails, meilleure sera la décomposition."
+            height=120
         )
         self.task_desc_text.pack(fill="x", pady=(5, 0))
         self.task_desc_text.bind("<KeyRelease>", self._on_task_input_change)
@@ -454,47 +469,163 @@ class TaskBreakerTool(BaseToolWindow):
             self.audio_service.play_sound('task_decomposed')
     
     def _genie_decompose(self):
-        """AI-powered decomposition."""
+        """AI-powered decomposition with enhanced context awareness."""
         if not self.is_ai_enabled:
             self._magic_decompose()
             return
         
         def ai_task():
+            # Build context-aware prompt
+            context_info = self._build_task_context()
+            
             prompt = f"""
-Décompose cette tâche en sous-tâches détaillées et actionables:
+Tu es un expert en gestion de projet et décomposition de tâches. Analyse cette tâche et décompose-la en sous-tâches détaillées et actionables.
 
+=== INFORMATIONS DE LA TÂCHE ===
 Titre: {self.current_task['title']}
 Description: {self.current_task['description']}
 Priorité: {self.current_task['priority']}
 Durée estimée: {self.current_task['duration']}
 Catégorie: {self.current_task['category']}
 
-Fournis une liste de 5-10 sous-tâches spécifiques et actionables.
-Chaque sous-tâche doit être claire et réalisable.
+=== CONTEXTE SUPPLÉMENTAIRE ===
+{context_info}
 
-Format de réponse:
-1. [Titre de la sous-tâche]
-2. [Titre de la sous-tâche]
-...
+=== INSTRUCTIONS ===
+1. Crée 6-12 sous-tâches spécifiques et actionables
+2. Ordonne-les logiquement (dépendances, priorités)
+3. Inclus des estimations de durée réalistes
+4. Ajoute des détails pratiques quand nécessaire
+5. Considère les risques et points de blocage potentiels
+
+=== FORMAT DE RÉPONSE REQUIS ===
+Réponds UNIQUEMENT avec une liste JSON structurée:
+
+[
+  {{
+    "title": "Titre de la sous-tâche",
+    "description": "Description détaillée avec conseils pratiques",
+    "estimated_duration": 45,
+    "priority": "high|medium|low",
+    "dependencies": ["ID ou titre des tâches prérequises"],
+    "tips": "Conseils spécifiques pour cette sous-tâche"
+  }}
+]
+
+Ne fournis AUCUN autre texte que cette liste JSON.
 """
             
             response = self.ai_service.make_request(
                 prompt=prompt,
                 feature='task_breakdown',
-                max_tokens=500
+                max_tokens=1200
             )
             
             return response.get('content', '')
         
         self.run_ai_task(ai_task)
     
+    def _build_task_context(self) -> str:
+        """Build additional context for AI analysis."""
+        context_parts = []
+        
+        # Add time-based context
+        current_hour = datetime.now().hour
+        if 6 <= current_hour < 12:
+            context_parts.append("Contexte temporel: Matinée (énergie élevée, concentration optimale)")
+        elif 12 <= current_hour < 14:
+            context_parts.append("Contexte temporel: Midi (pause déjeuner, énergie modérée)")
+        elif 14 <= current_hour < 18:
+            context_parts.append("Contexte temporel: Après-midi (productivité variable)")
+        else:
+            context_parts.append("Contexte temporel: Soirée (énergie réduite, tâches simples)")
+        
+        # Add category-specific context
+        category_contexts = {
+            "Travail": "Environnement professionnel, contraintes organisationnelles",
+            "Personnel": "Flexibilité horaire, motivation intrinsèque",
+            "Projet": "Objectifs définis, livrables attendus",
+            "Apprentissage": "Progression graduelle, pratique nécessaire",
+            "Créatif": "Inspiration variable, itérations multiples",
+            "Administratif": "Procédures à suivre, documentation requise"
+        }
+        
+        if self.current_task['category'] in category_contexts:
+            context_parts.append(f"Contexte catégorie: {category_contexts[self.current_task['category']]}")
+        
+        # Add priority-based context
+        priority_contexts = {
+            "Urgente": "Délais serrés, focus sur l'essentiel",
+            "Élevée": "Important mais planifiable, qualité requise",
+            "Moyenne": "Progression régulière, équilibre qualité/temps",
+            "Faible": "Flexible, peut être reporté si nécessaire"
+        }
+        
+        if self.current_task['priority'] in priority_contexts:
+            context_parts.append(f"Contexte priorité: {priority_contexts[self.current_task['priority']]}")
+        
+        return "\n".join(context_parts) if context_parts else "Aucun contexte spécifique"
+    
     def _handle_ai_result(self, result):
-        """Handle AI decomposition result."""
+        """Handle AI decomposition result with enhanced parsing."""
         if not result:
             messagebox.showerror("Erreur IA", "Aucune réponse de l'IA")
             return
         
-        # Parse AI response
+        try:
+            # Try to parse as JSON first (new format)
+            subtasks_data = self._parse_ai_json_response(result)
+            
+            if subtasks_data:
+                # Clear existing and add AI-generated subtasks
+                self._clear_breakdown()
+                
+                for subtask_data in subtasks_data:
+                    self._add_subtask(
+                        title=subtask_data.get('title', 'Sous-tâche sans titre'),
+                        description=subtask_data.get('description', ''),
+                        estimated_duration=subtask_data.get('estimated_duration', 30)
+                    )
+                
+                self.set_status(f"🤖 IA: Tâche décomposée en {len(subtasks_data)} sous-tâches intelligentes")
+                
+                # Show AI insights if available
+                self._show_ai_insights(subtasks_data)
+                
+            else:
+                # Fallback to legacy text parsing
+                self._parse_ai_text_response(result)
+                
+        except Exception as e:
+            self.logger.error(f"AI result parsing failed: {e}")
+            messagebox.showerror("Erreur de Parsing", f"Impossible de parser la réponse de l'IA: {e}")
+    
+    def _parse_ai_json_response(self, result: str) -> List[Dict]:
+        """Parse AI response as JSON format."""
+        try:
+            # Clean the response to extract JSON
+            result = result.strip()
+            
+            # Find JSON array in the response
+            start_idx = result.find('[')
+            end_idx = result.rfind(']') + 1
+            
+            if start_idx != -1 and end_idx > start_idx:
+                json_str = result[start_idx:end_idx]
+                subtasks_data = json.loads(json_str)
+                
+                # Validate the structure
+                if isinstance(subtasks_data, list) and len(subtasks_data) > 0:
+                    return subtasks_data
+            
+            return None
+            
+        except (json.JSONDecodeError, ValueError) as e:
+            self.logger.warning(f"JSON parsing failed: {e}")
+            return None
+    
+    def _parse_ai_text_response(self, result: str):
+        """Fallback text parsing for legacy AI responses."""
         lines = result.strip().split('\n')
         subtasks = []
         
@@ -523,49 +654,175 @@ Format de réponse:
         else:
             messagebox.showwarning("Erreur de Parsing", "Impossible de parser la réponse de l'IA")
     
+    def _show_ai_insights(self, subtasks_data: List[Dict]):
+        """Show AI insights about the task breakdown."""
+        try:
+            # Calculate insights
+            total_duration = sum(task.get('estimated_duration', 30) for task in subtasks_data)
+            high_priority_count = sum(1 for task in subtasks_data if task.get('priority') == 'high')
+            
+            # Show insights dialog
+            insights_text = f"""
+🎯 Analyse de la Décomposition IA
+
+📊 Statistiques:
+• {len(subtasks_data)} sous-tâches générées
+• Durée totale estimée: {total_duration} minutes ({total_duration//60}h{total_duration%60:02d})
+• Tâches prioritaires: {high_priority_count}
+
+💡 Recommandations IA:
+• Commencez par les tâches de haute priorité
+• Prévoyez des pauses entre les tâches longues
+• Vérifiez les dépendances avant de commencer
+"""
+            
+            # Add specific tips if available
+            tips = [task.get('tips') for task in subtasks_data if task.get('tips')]
+            if tips:
+                insights_text += "\n🔧 Conseils Spécifiques:\n"
+                for i, tip in enumerate(tips[:3], 1):  # Show max 3 tips
+                    insights_text += f"• {tip}\n"
+            
+            messagebox.showinfo("Insights IA", insights_text)
+            
+        except Exception as e:
+            self.logger.error(f"Failed to show AI insights: {e}")
+    
     def _ai_enhance_breakdown(self):
-        """Enhance existing breakdown with AI suggestions."""
+        """Enhance existing breakdown with AI suggestions and optimization."""
         if not self.subtasks:
             messagebox.showinfo("Aucune Décomposition", "Veuillez d'abord décomposer la tâche.")
             return
         
         def ai_task():
-            current_subtasks = [subtask['title'] for subtask in self.subtasks]
+            current_subtasks = [{
+                'title': subtask['title'],
+                'description': subtask['description'],
+                'duration': subtask['estimated_duration']
+            } for subtask in self.subtasks]
             
             prompt = f"""
-Améliore cette décomposition de tâche en ajoutant des détails et suggestions:
+Tu es un consultant en optimisation de processus. Analyse cette décomposition de tâche et propose des améliorations.
 
-Tâche principale: {self.current_task['title']}
-Sous-tâches actuelles:
-{chr(10).join([f"- {subtask}" for subtask in current_subtasks])}
+=== TÂCHE PRINCIPALE ===
+Titre: {self.current_task['title']}
+Description: {self.current_task['description']}
+Catégorie: {self.current_task['category']}
+Priorité: {self.current_task['priority']}
 
-Suggestions d'amélioration:
-1. Ajoute des détails manquants
-2. Identifie les étapes oubliées
-3. Propose des optimisations
-4. Suggère des outils ou ressources
+=== DÉCOMPOSITION ACTUELLE ===
+{json.dumps(current_subtasks, indent=2, ensure_ascii=False)}
 
-Format de réponse:
-AMÉLIORATIONS:
-- [Suggestion 1]
-- [Suggestion 2]
-...
+=== ANALYSE DEMANDÉE ===
+1. Identifie les étapes manquantes ou redondantes
+2. Propose des optimisations de séquence
+3. Suggère des outils et ressources
+4. Identifie les risques potentiels
+5. Recommande des améliorations de durée
 
-NOUVELLES SOUS-TÂCHES:
-- [Nouvelle sous-tâche 1]
-- [Nouvelle sous-tâche 2]
-...
+=== FORMAT DE RÉPONSE ===
+Réponds avec un JSON structuré:
+
+{{
+  "analysis": {{
+    "missing_steps": ["Étape manquante 1", "Étape manquante 2"],
+    "redundant_steps": ["Étape redondante"],
+    "optimization_suggestions": ["Suggestion 1", "Suggestion 2"],
+    "tools_and_resources": ["Outil 1", "Ressource 2"],
+    "potential_risks": ["Risque 1", "Risque 2"]
+  }},
+  "improved_subtasks": [
+    {{
+      "title": "Titre amélioré",
+      "description": "Description détaillée",
+      "estimated_duration": 30,
+      "priority": "high|medium|low",
+      "tools_needed": ["Outil 1"],
+      "risk_mitigation": "Comment éviter les problèmes"
+    }}
+  ],
+  "additional_subtasks": [
+    {{
+      "title": "Nouvelle sous-tâche",
+      "description": "Description",
+      "estimated_duration": 20,
+      "priority": "medium",
+      "reason": "Pourquoi cette tâche est nécessaire"
+    }}
+  ]
+}}
+
+Ne fournis AUCUN autre texte que ce JSON.
 """
             
             response = self.ai_service.make_request(
                 prompt=prompt,
                 feature='task_enhancement',
-                max_tokens=600
+                max_tokens=1500
             )
             
             return response.get('content', '')
         
-        self.run_ai_task(ai_task)
+        self.run_ai_task(ai_task, callback=self._handle_ai_enhancement_result)
+    
+    def _handle_ai_enhancement_result(self, result):
+        """Handle AI enhancement result."""
+        if not result:
+            messagebox.showerror("Erreur IA", "Aucune réponse de l'IA pour l'amélioration")
+            return
+        
+        try:
+            # Parse JSON response
+            enhancement_data = json.loads(result.strip())
+            
+            # Show enhancement dialog
+            dialog = EnhancementDialog(self, enhancement_data)
+            if dialog.show():
+                # Apply selected enhancements
+                self._apply_enhancements(dialog.selected_enhancements)
+                
+        except (json.JSONDecodeError, ValueError) as e:
+            self.logger.error(f"Enhancement parsing failed: {e}")
+            messagebox.showerror("Erreur de Parsing", f"Impossible de parser les améliorations: {e}")
+    
+    def _apply_enhancements(self, enhancements: Dict):
+        """Apply selected AI enhancements to the breakdown."""
+        try:
+            applied_count = 0
+            
+            # Add new subtasks if selected
+            if enhancements.get('add_missing_steps'):
+                for subtask_data in enhancements.get('additional_subtasks', []):
+                    self._add_subtask(
+                        title=subtask_data['title'],
+                        description=subtask_data['description'],
+                        estimated_duration=subtask_data.get('estimated_duration', 30)
+                    )
+                    applied_count += 1
+            
+            # Update existing subtasks if selected
+            if enhancements.get('improve_existing'):
+                improved_subtasks = enhancements.get('improved_subtasks', [])
+                for i, improved in enumerate(improved_subtasks):
+                    if i < len(self.subtasks):
+                        self.subtasks[i].update({
+                            'title': improved.get('title', self.subtasks[i]['title']),
+                            'description': improved.get('description', self.subtasks[i]['description']),
+                            'estimated_duration': improved.get('estimated_duration', self.subtasks[i]['estimated_duration'])
+                        })
+                        applied_count += 1
+            
+            if applied_count > 0:
+                self._refresh_subtasks_display()
+                self.set_status(f"🚀 {applied_count} améliorations IA appliquées")
+                
+                # Play audio feedback
+                if self.audio_service:
+                    self.audio_service.play_sound('enhancement_applied')
+            
+        except Exception as e:
+            self.logger.error(f"Failed to apply enhancements: {e}")
+            messagebox.showerror("Erreur", f"Impossible d'appliquer les améliorations: {e}")
     
     def _add_subtask(self, title: str, description: str = "", estimated_duration: int = 30):
         """Add a subtask to the breakdown."""
@@ -742,8 +999,43 @@ NOUVELLES SOUS-TÂCHES:
             messagebox.showinfo("Aucune Décomposition", "Aucune sous-tâche à sauvegarder.")
             return
         
-        # TODO: Implement template saving
-        messagebox.showinfo("Info", "Sauvegarde de template en développement")
+        try:
+            # Get template name
+            template_name = tk.simpledialog.askstring(
+                "Nom du Template",
+                "Nom pour ce template:",
+                initialvalue=self.current_task['title'][:30] if self.current_task else ""
+            )
+            
+            if not template_name:
+                return
+            
+            # Create template data
+            template_data = {
+                'name': template_name,
+                'category': self.current_task['category'],
+                'subtasks': [{
+                    'title': subtask['title'],
+                    'description': subtask['description'],
+                    'estimated_duration': subtask['estimated_duration']
+                } for subtask in self.subtasks],
+                'created_at': datetime.now().isoformat()
+            }
+            
+            # Save template (you can extend this to save to database)
+            self.templates[template_name] = [s['title'] for s in self.subtasks]
+            
+            messagebox.showinfo(
+                "Template Sauvé",
+                f"Template '{template_name}' sauvé avec {len(self.subtasks)} sous-tâches."
+            )
+            
+            # Refresh template buttons (you might want to implement this)
+            # self._refresh_template_buttons()
+            
+        except Exception as e:
+            self.logger.error(f"Template saving failed: {e}")
+            messagebox.showerror("Erreur", f"Impossible de sauver le template: {e}")
     
     def _create_tasks_from_breakdown(self):
         """Create actual tasks from the breakdown."""
@@ -830,8 +1122,256 @@ NOUVELLES SOUS-TÂCHES:
             messagebox.showinfo("Aucune Donnée", "Aucune décomposition à exporter.")
             return
         
-        # TODO: Implement export functionality
-        messagebox.showinfo("Info", "Export en développement")
+        try:
+            # Get export format
+            export_format = messagebox.askyesno(
+                "Format d'Export",
+                "Exporter en format JSON détaillé ?\n\nOui = JSON (avec métadonnées)\nNon = Texte simple"
+            )
+            
+            # Get save location
+            extension = ".json" if export_format else ".txt"
+            filepath = filedialog.asksaveasfilename(
+                title="Exporter Décomposition",
+                defaultextension=extension,
+                filetypes=[
+                    ("JSON files", "*.json") if export_format else ("Text files", "*.txt"),
+                    ("All files", "*.*")
+                ]
+            )
+            
+            if not filepath:
+                return
+            
+            if export_format:
+                # Export as JSON with full metadata
+                export_data = {
+                    'task': self.current_task,
+                    'subtasks': self.subtasks,
+                    'export_metadata': {
+                        'exported_at': datetime.now().isoformat(),
+                        'tool_version': '2.0',
+                        'total_estimated_duration': sum(s['estimated_duration'] for s in self.subtasks)
+                    }
+                }
+                
+                with open(filepath, 'w', encoding='utf-8') as f:
+                    json.dump(export_data, f, ensure_ascii=False, indent=2)
+            else:
+                # Export as readable text
+                content = f"""
+=== DÉCOMPOSITION DE TÂCHE ===
+
+Tâche Principale: {self.current_task['title']}
+Description: {self.current_task['description']}
+Catégorie: {self.current_task['category']}
+Priorité: {self.current_task['priority']}
+Durée Estimée: {self.current_task['duration']}
+
+=== SOUS-TÂCHES ({len(self.subtasks)}) ===
+
+"""
+                
+                for i, subtask in enumerate(self.subtasks, 1):
+                    content += f"{i}. {subtask['title']}\n"
+                    if subtask['description']:
+                        content += f"   Description: {subtask['description']}\n"
+                    content += f"   Durée: {subtask['estimated_duration']} minutes\n\n"
+                
+                total_duration = sum(s['estimated_duration'] for s in self.subtasks)
+                content += f"\n=== RÉSUMÉ ===\n"
+                content += f"Durée totale estimée: {total_duration} minutes ({total_duration//60}h{total_duration%60:02d})\n"
+                content += f"Exporté le: {datetime.now().strftime('%d/%m/%Y à %H:%M')}\n"
+                
+                with open(filepath, 'w', encoding='utf-8') as f:
+                    f.write(content)
+            
+            messagebox.showinfo("Export", f"Décomposition exportée avec succès:\n{filepath}")
+            
+        except Exception as e:
+            self.logger.error(f"Export failed: {e}")
+            messagebox.showerror("Erreur", f"Échec de l'export: {e}")
+
+
+class EnhancementDialog:
+    """Dialog for displaying and selecting AI enhancement suggestions."""
+    
+    def __init__(self, parent, enhancement_data: Dict):
+        self.parent = parent
+        self.enhancement_data = enhancement_data
+        self.selected_enhancements = {}
+        self.dialog = None
+        self.result = False
+    
+    def show(self) -> bool:
+        """Show the enhancement dialog and return True if user accepts."""
+        self.dialog = ctk.CTkToplevel(self.parent)
+        self.dialog.title("🚀 Améliorations IA Suggérées")
+        self.dialog.geometry("700x600")
+        self.dialog.transient(self.parent)
+        self.dialog.grab_set()
+        
+        # Center the dialog
+        self._center_dialog()
+        
+        # Create content
+        self._create_content()
+        
+        # Wait for dialog to close
+        self.dialog.wait_window()
+        
+        return self.result
+    
+    def _center_dialog(self):
+        """Center the dialog on the parent window."""
+        self.dialog.update_idletasks()
+        parent_x = self.parent.winfo_rootx()
+        parent_y = self.parent.winfo_rooty()
+        parent_width = self.parent.winfo_width()
+        parent_height = self.parent.winfo_height()
+        
+        dialog_width = self.dialog.winfo_reqwidth()
+        dialog_height = self.dialog.winfo_reqheight()
+        
+        x = parent_x + (parent_width - dialog_width) // 2
+        y = parent_y + (parent_height - dialog_height) // 2
+        
+        self.dialog.geometry(f"+{x}+{y}")
+    
+    def _create_content(self):
+        """Create the dialog content."""
+        # Main frame
+        main_frame = ctk.CTkFrame(self.dialog)
+        main_frame.pack(fill="both", expand=True, padx=20, pady=20)
+        
+        # Title
+        title_label = ctk.CTkLabel(
+            main_frame,
+            text="🤖 Améliorations Suggérées par l'IA",
+            font=ctk.CTkFont(size=18, weight="bold")
+        )
+        title_label.pack(pady=(0, 20))
+        
+        # Scrollable frame for content
+        scroll_frame = ctk.CTkScrollableFrame(main_frame, height=400)
+        scroll_frame.pack(fill="both", expand=True, pady=(0, 20))
+        
+        # Analysis section
+        analysis = self.enhancement_data.get('analysis', {})
+        if analysis:
+            self._add_analysis_section(scroll_frame, analysis)
+        
+        # Enhancement options
+        self._add_enhancement_options(scroll_frame)
+        
+        # Buttons
+        button_frame = ctk.CTkFrame(main_frame)
+        button_frame.pack(fill="x", pady=(10, 0))
+        
+        cancel_btn = ctk.CTkButton(
+            button_frame,
+            text="Annuler",
+            command=self._cancel
+        )
+        cancel_btn.pack(side="left", padx=(0, 10))
+        
+        apply_btn = ctk.CTkButton(
+            button_frame,
+            text="Appliquer les Améliorations",
+            command=self._apply
+        )
+        apply_btn.pack(side="right")
+    
+    def _add_analysis_section(self, parent, analysis: Dict):
+        """Add analysis section to the dialog."""
+        analysis_frame = ctk.CTkFrame(parent)
+        analysis_frame.pack(fill="x", pady=(0, 15))
+        
+        analysis_label = ctk.CTkLabel(
+            analysis_frame,
+            text="📊 Analyse de l'IA",
+            font=ctk.CTkFont(size=14, weight="bold")
+        )
+        analysis_label.pack(pady=(10, 5))
+        
+        # Show analysis points
+        for key, items in analysis.items():
+            if items and isinstance(items, list):
+                section_name = {
+                    'missing_steps': '❌ Étapes Manquantes',
+                    'redundant_steps': '🔄 Étapes Redondantes',
+                    'optimization_suggestions': '⚡ Optimisations',
+                    'tools_and_resources': '🛠️ Outils Suggérés',
+                    'potential_risks': '⚠️ Risques Identifiés'
+                }.get(key, key.replace('_', ' ').title())
+                
+                section_label = ctk.CTkLabel(
+                    analysis_frame,
+                    text=section_name,
+                    font=ctk.CTkFont(size=12, weight="bold")
+                )
+                section_label.pack(anchor="w", padx=10, pady=(5, 0))
+                
+                for item in items[:3]:  # Show max 3 items
+                    item_label = ctk.CTkLabel(
+                        analysis_frame,
+                        text=f"• {item}",
+                        font=ctk.CTkFont(size=11)
+                    )
+                    item_label.pack(anchor="w", padx=20)
+        
+        analysis_frame.pack_configure(pady=(0, 15))
+    
+    def _add_enhancement_options(self, parent):
+        """Add enhancement options with checkboxes."""
+        options_frame = ctk.CTkFrame(parent)
+        options_frame.pack(fill="x", pady=(0, 15))
+        
+        options_label = ctk.CTkLabel(
+            options_frame,
+            text="🎯 Options d'Amélioration",
+            font=ctk.CTkFont(size=14, weight="bold")
+        )
+        options_label.pack(pady=(10, 10))
+        
+        # Add missing steps option
+        additional_subtasks = self.enhancement_data.get('additional_subtasks', [])
+        if additional_subtasks:
+            self.add_missing_var = ctk.BooleanVar(value=True)
+            add_missing_cb = ctk.CTkCheckBox(
+                options_frame,
+                text=f"Ajouter {len(additional_subtasks)} nouvelles sous-tâches",
+                variable=self.add_missing_var
+            )
+            add_missing_cb.pack(anchor="w", padx=10, pady=5)
+        
+        # Improve existing option
+        improved_subtasks = self.enhancement_data.get('improved_subtasks', [])
+        if improved_subtasks:
+            self.improve_existing_var = ctk.BooleanVar(value=True)
+            improve_existing_cb = ctk.CTkCheckBox(
+                options_frame,
+                text=f"Améliorer les sous-tâches existantes",
+                variable=self.improve_existing_var
+            )
+            improve_existing_cb.pack(anchor="w", padx=10, pady=5)
+    
+    def _apply(self):
+        """Apply selected enhancements."""
+        self.selected_enhancements = {
+            'add_missing_steps': getattr(self, 'add_missing_var', ctk.BooleanVar()).get(),
+            'improve_existing': getattr(self, 'improve_existing_var', ctk.BooleanVar()).get(),
+            'additional_subtasks': self.enhancement_data.get('additional_subtasks', []),
+            'improved_subtasks': self.enhancement_data.get('improved_subtasks', [])
+        }
+        
+        self.result = True
+        self.dialog.destroy()
+    
+    def _cancel(self):
+        """Cancel the dialog."""
+        self.result = False
+        self.dialog.destroy()
 
 
 class SubtaskDialog(ctk.CTkToplevel):

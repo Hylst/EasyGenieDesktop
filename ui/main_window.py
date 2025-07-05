@@ -303,7 +303,8 @@ class MainWindow:
             ("📝 Nouvelle Tâche", self._quick_new_task),
             ("🧠 Décharge Rapide", self._quick_brain_dump),
             ("⏰ Focus Session", self._quick_focus_session),
-            ("📊 Voir Statistiques", self._show_dashboard)
+            ("📊 Voir Statistiques", self._show_dashboard),
+            ("🔧 Diagnostic", self._show_diagnostic)
         ]
         
         for text, command in quick_actions:
@@ -751,14 +752,45 @@ class MainWindow:
                     ai_service=self.ai_service,
                     database_manager=self.database_manager,
                     audio_service=self.audio_service,
-                    settings_manager=self.settings_manager,
-                    theme_manager=self.theme_manager
+                    settings_manager=self.settings_manager
                 )
                 tool.grid(row=0, column=0, sticky="nsew", padx=10, pady=10)
+            elif tool_id == 'task_breaker':
+                from ui.tools.task_breaker import TaskBreakerTool
+                tool = TaskBreakerTool(
+                    parent=self.content_area,
+                    magic_energy_level=self.magic_energy_level,
+                    ai_service=self.ai_service,
+                    database_manager=self.database_manager,
+                    audio_service=self.audio_service,
+                    settings_manager=self.settings_manager
+                )
+                tool.grid(row=0, column=0, sticky="nsew", padx=10, pady=10)
+            elif tool_id == 'priority_grid':
+                from ui.tools.tool_fixes import SimplePriorityGrid
+                tool = SimplePriorityGrid(self)
+                tool.show()
+            elif tool_id == 'time_focus':
+                from ui.tools.tool_fixes import SimpleTimeFocus
+                tool = SimpleTimeFocus(self)
+                tool.show()
+            elif tool_id == 'formalizer':
+                from ui.tools.tool_fixes import SimpleFormalizerTool
+                tool = SimpleFormalizerTool(self)
+                tool.show()
+            elif tool_id == 'routine_builder':
+                from ui.tools.tool_fixes import SimpleRoutineBuilder
+                tool = SimpleRoutineBuilder(self)
+                tool.show()
+            elif tool_id == 'immersive_reader':
+                from ui.tools.tool_fixes import SimpleImmersiveReader
+                tool = SimpleImmersiveReader(self)
+                tool.show()
             else:
                 # For other tools, show placeholder for now
                 self._show_tool_placeholder(tool_id)
             
+            self.current_tool = tool_id
             self.logger.info(f"Opened tool: {tool_id}")
             
         except Exception as e:
@@ -840,8 +872,7 @@ class MainWindow:
     def _quick_new_task(self):
         """Quick new task creation."""
         self.set_status("Création d'une nouvelle tâche...")
-        # TODO: Open task creation dialog
-        messagebox.showinfo("Info", "Fonctionnalité en développement")
+        self._open_tool('task_breaker')
     
     def _quick_brain_dump(self):
         """Quick brain dump."""
@@ -851,8 +882,7 @@ class MainWindow:
     def _quick_focus_session(self):
         """Quick focus session."""
         self.set_status("Démarrage d'une session de focus...")
-        # TODO: Open TimeFocus tool
-        messagebox.showinfo("Info", "Fonctionnalité en développement")
+        self._open_tool('time_focus')
     
     def _show_dashboard(self):
         """Show user dashboard with statistics."""
@@ -879,6 +909,16 @@ class MainWindow:
         """Show help and documentation."""
         # TODO: Open help window
         messagebox.showinfo("Aide", "Documentation en développement")
+    
+    def _show_diagnostic(self):
+        """Show diagnostic tool."""
+        try:
+            from ui.tools.diagnostic_tool import DiagnosticTool
+            diagnostic = DiagnosticTool(self)
+            diagnostic.show_diagnostic_window()
+        except Exception as e:
+            self.logger.error(f"Erreur ouverture diagnostic: {e}")
+            messagebox.showerror("Erreur", f"Impossible d'ouvrir le diagnostic: {e}")
     
     def _show_export_dialog(self):
         """Show export dialog."""

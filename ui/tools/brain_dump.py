@@ -110,7 +110,6 @@ class BrainDumpTool(BaseToolWindow):
         
         self.title_entry = ctk.CTkEntry(
             title_frame,
-            placeholder_text="Titre de votre décharge...",
             height=30
         )
         self.title_entry.pack(side="right", fill="x", expand=True, padx=(10, 0))
@@ -146,7 +145,6 @@ class BrainDumpTool(BaseToolWindow):
         
         self.tags_entry = ctk.CTkEntry(
             meta_frame,
-            placeholder_text="tag1, tag2, tag3...",
             width=200
         )
         self.tags_entry.pack(side="left", padx=(5, 0))
