@@ -34,17 +34,7 @@ class BrainDumpTool(BaseToolWindow):
                  settings_manager=None, ai_service=None, audio_service=None, 
                  database_manager=None, **kwargs):
         """Initialize Brain Dump tool."""
-        super().__init__(
-            parent, 
-            "Décharge de Pensées", 
-            magic_energy_level,
-            settings_manager,
-            ai_service,
-            audio_service,
-            database_manager,
-            **kwargs
-        )
-        
+        # Initialize tool-specific attributes BEFORE calling super()
         # Brain dump data
         self.current_dump = {
             'id': str(uuid.uuid4()),
@@ -67,6 +57,18 @@ class BrainDumpTool(BaseToolWindow):
         # Analysis cache
         self.last_analysis = None
         self.analysis_cache = {}
+        
+        # Now call parent initialization
+        super().__init__(
+            parent, 
+            "Décharge de Pensées", 
+            magic_energy_level,
+            settings_manager,
+            ai_service,
+            audio_service,
+            database_manager,
+            **kwargs
+        )
         
         self.logger.info("Brain Dump tool initialized")
     

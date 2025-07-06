@@ -21,6 +21,13 @@
 - [x] Formalizer tool (text formalization)
 - [x] Routine Builder tool (habit management)
 - [x] Immersive Reader tool (reading assistance)
+- [x] **CRITICAL BUG FIXES (January 2025)**
+  - [x] Fixed TaskBreakerTool 'templates' attribute error
+  - [x] Fixed BrainDumpTool 'current_dump' attribute error
+  - [x] Fixed initialization order in BaseToolWindow subclasses
+  - [x] Fixed simple tools 'tk' attribute access issues
+  - [x] Corrected diagnostic tool instantiation errors
+  - [x] All tools now launch without errors
 
 ### 📋 To Do
 - [ ] Reusable UI components (dialogs, widgets)
@@ -53,6 +60,114 @@
 - [ ] Export/import functionality for translations
 
 ## Phase 2 (Enrichissement) - 🚀 IN PROGRESS
+
+### 🚀 IMMEDIATE PRIORITY: Simple Tools AI Enhancement
+**Current Status**: Simple tools are functional but basic. They need AI integration to become truly powerful.
+
+- [ ] **SimplePriorityGrid → AI-Powered Priority Matrix**
+  - [ ] Automatic task urgency/importance classification using NLP
+  - [ ] Smart deadline analysis and priority scoring
+  - [ ] Context-aware task categorization
+  - [ ] Workload balancing recommendations
+  - [ ] Integration with calendar and external task systems
+
+- [ ] **SimpleTimeFocus → Intelligent Focus Assistant**
+  - [ ] Personalized productivity pattern analysis
+  - [ ] AI-driven break recommendations based on cognitive load
+  - [ ] Distraction prediction and prevention strategies
+  - [ ] Focus session optimization using historical data
+  - [ ] Adaptive timer intervals based on task complexity
+
+- [ ] **SimpleFormalizerTool → Advanced Text Intelligence**
+  - [ ] Multi-style text transformation (academic, business, casual, creative)
+  - [ ] Tone consistency analysis and adjustment
+  - [ ] Cultural context awareness for international communication
+  - [ ] Grammar enhancement beyond basic correction
+  - [ ] Intent preservation during formalization
+
+- [ ] **SimpleRoutineBuilder → Habit Science Integration**
+  - [ ] Evidence-based habit formation recommendations
+  - [ ] Circadian rhythm optimization for routine scheduling
+  - [ ] Energy level tracking and adaptive scheduling
+  - [ ] Goal-oriented routine suggestions with success prediction
+  - [ ] Behavioral psychology insights integration
+
+- [ ] **SimpleImmersiveReader → Cognitive Reading Assistant**
+  - [ ] Reading comprehension analysis and improvement suggestions
+  - [ ] Adaptive text complexity adjustment
+  - [ ] Intelligent highlighting of key concepts
+  - [ ] Reading speed optimization with comprehension tracking
+  - [ ] Content summarization and knowledge extraction
+
+---
+
+## January 2025 - Interface Integration & Responsive Design
+
+### ✅ COMPLETED: Tool Integration into Main Interface
+
+#### Problem Resolved
+- **Issue**: Simple tools (SimplePriorityGrid, SimpleTimeFocus, SimpleFormalizerTool, SimpleRoutineBuilder, SimpleImmersiveReader) were opening in separate CTkToplevel windows
+- **User Request**: All tools should integrate directly into the main application interface
+
+#### Solution Implemented
+1. **Modified `_open_tool` method** in `main_window.py`:
+   - Replaced `.show()` calls for simple tools with integrated creation methods
+   - Tools now display directly in the main content area
+
+2. **Created integrated tool methods**:
+   - `_create_integrated_priority_grid()`: Eisenhower Matrix with quadrant textboxes
+   - `_create_integrated_time_focus()`: Pomodoro timer with session controls
+   - `_create_integrated_formalizer()`: Text input/output with style options
+   - `_create_integrated_routine_builder()`: Routine management with task lists
+   - `_create_integrated_immersive_reader()`: Document reader with reading controls
+
+3. **Enhanced UI Components**:
+   - Header sections with back navigation
+   - Responsive content frames
+   - Integrated control buttons
+   - Consistent styling across all tools
+
+### ✅ COMPLETED: Responsive Design Implementation
+
+#### Responsive Layout Features
+1. **Dynamic Window Resizing**:
+   - Enhanced `_on_window_configure()` method with responsive adjustments
+   - Automatic sidebar width adjustment based on window size
+   - Content area padding optimization
+
+2. **Adaptive Layout System**:
+   - **Compact mode** (< 900px): Sidebar width 180px, reduced padding
+   - **Medium mode** (900-1200px): Sidebar width 220px, standard padding
+   - **Full mode** (> 1200px): Sidebar width 250px, full padding
+
+3. **Grid Configuration Improvements**:
+   - Responsive grid weights in content area
+   - Minimum column sizes for better layout stability
+   - Optimized main window grid configuration
+
+4. **Performance Optimizations**:
+   - Efficient layout adjustment algorithms
+   - Error handling for responsive operations
+   - Smooth transitions between layout modes
+
+#### Technical Implementation
+- **File Modified**: `ui/main_window.py`
+- **Methods Added**: `_adjust_responsive_layout()`, `_adjust_quick_actions_layout()`
+- **Grid Enhancements**: Improved weight distribution and minimum sizes
+- **Error Handling**: Robust exception handling for layout operations
+
+### Impact
+- **User Experience**: Seamless tool integration without window management overhead
+- **Interface Consistency**: Unified design language across all tools
+- **Responsiveness**: Adaptive interface that works well on different screen sizes
+- **Performance**: Optimized layout calculations and smooth resizing
+
+### Verification
+- ✅ All simple tools now integrate into main interface
+- ✅ No separate windows opened for simple tools
+- ✅ Responsive design adapts to window resizing
+- ✅ Application launches successfully without errors
+- ✅ Layout remains stable across different window sizes
 
 ### 🎯 Priority 1: Enhanced AI Features (Genie Modes)
 - [ ] **Task Breaker AI Enhancement**

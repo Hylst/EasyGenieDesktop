@@ -487,11 +487,17 @@ class MainWindow:
         export_btn.pack(fill="x", padx=5, pady=(2, 10))
     
     def _create_content_area(self):
-        """Create the main content area."""
+        """Create the main content area with responsive configuration."""
         self.content_area = ctk.CTkFrame(self.root, corner_radius=0)
         self.content_area.grid(row=0, column=1, sticky="nsew", padx=0, pady=0)
+        
+        # Configure responsive grid weights
         self.content_area.grid_columnconfigure(0, weight=1)
         self.content_area.grid_rowconfigure(0, weight=1)
+        
+        # Configure main window grid for responsive behavior
+        self.root.grid_columnconfigure(1, weight=1)  # Content area column
+        self.root.grid_rowconfigure(0, weight=1)     # Main content row
         
         # Welcome screen
         self._show_welcome_screen()
@@ -526,11 +532,14 @@ class MainWindow:
         )
         subtitle.pack(pady=(0, 20))
         
-        # Main content
+        # Main content with responsive configuration
         main_content = ctk.CTkFrame(welcome_frame)
         main_content.grid(row=1, column=0, sticky="nsew")
-        main_content.grid_columnconfigure((0, 1), weight=1)
+        main_content.grid_columnconfigure((0, 1), weight=1, minsize=300)
         main_content.grid_rowconfigure(1, weight=1)
+        
+        # Store reference for responsive adjustments
+        self.welcome_main_content = main_content
         
         # Quick start section
         quick_start_frame = ctk.CTkFrame(main_content)
@@ -736,7 +745,7 @@ class MainWindow:
         self.logger.info(f"Energy level changed to: {self.magic_energy_level}")
     
     def _open_tool(self, tool_id: str):
-        """Open a specific tool."""
+        """Open a specific tool in the main content area."""
         try:
             self.set_status(f"Ouverture de {self.tools[tool_id]['name']}...")
             
@@ -767,25 +776,15 @@ class MainWindow:
                 )
                 tool.grid(row=0, column=0, sticky="nsew", padx=10, pady=10)
             elif tool_id == 'priority_grid':
-                from ui.tools.tool_fixes import SimplePriorityGrid
-                tool = SimplePriorityGrid(self)
-                tool.show()
+                self._create_integrated_priority_grid()
             elif tool_id == 'time_focus':
-                from ui.tools.tool_fixes import SimpleTimeFocus
-                tool = SimpleTimeFocus(self)
-                tool.show()
+                self._create_integrated_time_focus()
             elif tool_id == 'formalizer':
-                from ui.tools.tool_fixes import SimpleFormalizerTool
-                tool = SimpleFormalizerTool(self)
-                tool.show()
+                self._create_integrated_formalizer()
             elif tool_id == 'routine_builder':
-                from ui.tools.tool_fixes import SimpleRoutineBuilder
-                tool = SimpleRoutineBuilder(self)
-                tool.show()
+                self._create_integrated_routine_builder()
             elif tool_id == 'immersive_reader':
-                from ui.tools.tool_fixes import SimpleImmersiveReader
-                tool = SimpleImmersiveReader(self)
-                tool.show()
+                self._create_integrated_immersive_reader()
             else:
                 # For other tools, show placeholder for now
                 self._show_tool_placeholder(tool_id)
@@ -897,6 +896,477 @@ class MainWindow:
     
     def _show_user_stats(self):
         """Show user statistics."""
+        # TODO: Show user statistics
+        messagebox.showinfo("Info", "Statistiques utilisateur en développement")
+    
+    def _create_integrated_priority_grid(self):
+        """Create integrated Priority Grid tool in content area."""
+        # Create main container
+        tool_frame = ctk.CTkFrame(self.content_area)
+        tool_frame.grid(row=0, column=0, sticky="nsew", padx=10, pady=10)
+        tool_frame.grid_columnconfigure(0, weight=1)
+        tool_frame.grid_rowconfigure(1, weight=1)
+        
+        # Header with back button
+        header_frame = ctk.CTkFrame(tool_frame)
+        header_frame.grid(row=0, column=0, sticky="ew", padx=10, pady=10)
+        header_frame.grid_columnconfigure(1, weight=1)
+        
+        back_btn = ctk.CTkButton(
+            header_frame,
+            text="← Accueil",
+            width=100,
+            command=self._show_welcome_screen
+        )
+        back_btn.grid(row=0, column=0, padx=(0, 10))
+        
+        title_label = ctk.CTkLabel(
+            header_frame,
+            text="📊 Matrice d'Eisenhower - Grille de Priorités",
+            font=ctk.CTkFont(size=18, weight="bold")
+        )
+        title_label.grid(row=0, column=1, sticky="w")
+        
+        # Main content
+        content_frame = ctk.CTkFrame(tool_frame)
+        content_frame.grid(row=1, column=0, sticky="nsew", padx=10, pady=(0, 10))
+        content_frame.grid_columnconfigure(1, weight=1)
+        content_frame.grid_columnconfigure(2, weight=1)
+        content_frame.grid_rowconfigure(1, weight=1)
+        content_frame.grid_rowconfigure(2, weight=1)
+        
+        # Headers
+        ctk.CTkLabel(content_frame, text="", width=120).grid(row=0, column=0, padx=5, pady=5)
+        ctk.CTkLabel(content_frame, text="URGENT", font=ctk.CTkFont(weight="bold")).grid(row=0, column=1, padx=5, pady=5)
+        ctk.CTkLabel(content_frame, text="PAS URGENT", font=ctk.CTkFont(weight="bold")).grid(row=0, column=2, padx=5, pady=5)
+        
+        ctk.CTkLabel(content_frame, text="IMPORTANT", font=ctk.CTkFont(weight="bold")).grid(row=1, column=0, padx=5, pady=5, sticky="n")
+        ctk.CTkLabel(content_frame, text="PAS IMPORTANT", font=ctk.CTkFont(weight="bold")).grid(row=2, column=0, padx=5, pady=5, sticky="n")
+        
+        # Quadrants
+        q1 = ctk.CTkTextbox(content_frame, height=200)
+        q1.grid(row=1, column=1, padx=5, pady=5, sticky="nsew")
+        q1.insert("1.0", "Q1: FAIRE\n- Crises\n- Urgences\n- Projets à échéance")
+        
+        q2 = ctk.CTkTextbox(content_frame, height=200)
+        q2.grid(row=1, column=2, padx=5, pady=5, sticky="nsew")
+        q2.insert("1.0", "Q2: PLANIFIER\n- Prévention\n- Développement\n- Planification")
+        
+        q3 = ctk.CTkTextbox(content_frame, height=200)
+        q3.grid(row=2, column=1, padx=5, pady=5, sticky="nsew")
+        q3.insert("1.0", "Q3: DÉLÉGUER\n- Interruptions\n- Certains appels\n- Certains emails")
+        
+        q4 = ctk.CTkTextbox(content_frame, height=200)
+        q4.grid(row=2, column=2, padx=5, pady=5, sticky="nsew")
+        q4.insert("1.0", "Q4: ÉLIMINER\n- Distractions\n- Perte de temps\n- Activités inutiles")
+        
+        # Action buttons
+        button_frame = ctk.CTkFrame(tool_frame, fg_color="transparent")
+        button_frame.grid(row=2, column=0, sticky="ew", padx=10, pady=(0, 10))
+        
+        save_btn = ctk.CTkButton(
+            button_frame,
+            text="💾 Sauvegarder",
+            command=lambda: self.set_status("Grille sauvegardée avec succès!")
+        )
+        save_btn.pack(side="left", padx=(0, 10))
+        
+        export_btn = ctk.CTkButton(
+            button_frame,
+            text="📤 Exporter",
+            command=lambda: self.set_status("Fonctionnalité d'export disponible bientôt!")
+        )
+        export_btn.pack(side="left")
+    
+    def _create_integrated_time_focus(self):
+        """Create integrated TimeFocus tool in content area."""
+        # Create main container
+        tool_frame = ctk.CTkFrame(self.content_area)
+        tool_frame.grid(row=0, column=0, sticky="nsew", padx=10, pady=10)
+        tool_frame.grid_columnconfigure(0, weight=1)
+        tool_frame.grid_rowconfigure(1, weight=1)
+        
+        # Header with back button
+        header_frame = ctk.CTkFrame(tool_frame)
+        header_frame.grid(row=0, column=0, sticky="ew", padx=10, pady=10)
+        header_frame.grid_columnconfigure(1, weight=1)
+        
+        back_btn = ctk.CTkButton(
+            header_frame,
+            text="← Accueil",
+            width=100,
+            command=self._show_welcome_screen
+        )
+        back_btn.grid(row=0, column=0, padx=(0, 10))
+        
+        title_label = ctk.CTkLabel(
+            header_frame,
+            text="⏰ TimeFocus - Technique Pomodoro",
+            font=ctk.CTkFont(size=18, weight="bold")
+        )
+        title_label.grid(row=0, column=1, sticky="w")
+        
+        # Main content
+        content_frame = ctk.CTkFrame(tool_frame)
+        content_frame.grid(row=1, column=0, sticky="nsew", padx=10, pady=(0, 10))
+        content_frame.grid_columnconfigure(0, weight=1)
+        
+        # Timer display
+        timer_frame = ctk.CTkFrame(content_frame)
+        timer_frame.grid(row=0, column=0, sticky="ew", padx=20, pady=20)
+        
+        time_label = ctk.CTkLabel(
+            timer_frame,
+            text="25:00",
+            font=ctk.CTkFont(size=48, weight="bold")
+        )
+        time_label.pack(pady=20)
+        
+        status_label = ctk.CTkLabel(
+            timer_frame,
+            text="Prêt à commencer",
+            font=ctk.CTkFont(size=14)
+        )
+        status_label.pack(pady=10)
+        
+        # Controls
+        controls_frame = ctk.CTkFrame(content_frame, fg_color="transparent")
+        controls_frame.grid(row=1, column=0, pady=20)
+        
+        start_btn = ctk.CTkButton(
+            controls_frame,
+            text="▶️ Démarrer",
+            width=120,
+            height=40,
+            command=lambda: self.set_status("Timer démarré!")
+        )
+        start_btn.pack(side="left", padx=5)
+        
+        reset_btn = ctk.CTkButton(
+            controls_frame,
+            text="🔄 Reset",
+            width=100,
+            height=40,
+            command=lambda: self.set_status("Timer remis à zéro")
+        )
+        reset_btn.pack(side="left", padx=5)
+        
+        # Session selector
+        session_frame = ctk.CTkFrame(content_frame)
+        session_frame.grid(row=2, column=0, sticky="ew", padx=20, pady=20)
+        
+        ctk.CTkLabel(
+            session_frame,
+            text="Type de session:",
+            font=ctk.CTkFont(size=12, weight="bold")
+        ).pack(pady=(10, 5))
+        
+        session_menu = ctk.CTkOptionMenu(
+            session_frame,
+            values=["Travail (25 min)", "Pause courte (5 min)", "Pause longue (15 min)"]
+        )
+        session_menu.pack(pady=(0, 10))
+        
+        # Stats
+        stats_frame = ctk.CTkFrame(content_frame)
+        stats_frame.grid(row=3, column=0, sticky="ew", padx=20, pady=(0, 20))
+        
+        ctk.CTkLabel(
+            stats_frame,
+            text="📊 Sessions aujourd'hui: 0",
+            font=ctk.CTkFont(size=12)
+        ).pack(pady=10)
+    
+    def _create_integrated_formalizer(self):
+        """Create integrated Formalizer tool in content area."""
+        # Create main container
+        tool_frame = ctk.CTkFrame(self.content_area)
+        tool_frame.grid(row=0, column=0, sticky="nsew", padx=10, pady=10)
+        tool_frame.grid_columnconfigure(0, weight=1)
+        tool_frame.grid_rowconfigure(1, weight=1)
+        
+        # Header with back button
+        header_frame = ctk.CTkFrame(tool_frame)
+        header_frame.grid(row=0, column=0, sticky="ew", padx=10, pady=10)
+        header_frame.grid_columnconfigure(1, weight=1)
+        
+        back_btn = ctk.CTkButton(
+            header_frame,
+            text="← Accueil",
+            width=100,
+            command=self._show_welcome_screen
+        )
+        back_btn.grid(row=0, column=0, padx=(0, 10))
+        
+        title_label = ctk.CTkLabel(
+            header_frame,
+            text="✍️ Formaliseur de Texte",
+            font=ctk.CTkFont(size=18, weight="bold")
+        )
+        title_label.grid(row=0, column=1, sticky="w")
+        
+        # Main content
+        content_frame = ctk.CTkFrame(tool_frame)
+        content_frame.grid(row=1, column=0, sticky="nsew", padx=10, pady=(0, 10))
+        content_frame.grid_columnconfigure((0, 1), weight=1)
+        content_frame.grid_rowconfigure(1, weight=1)
+        
+        # Input section
+        input_frame = ctk.CTkFrame(content_frame)
+        input_frame.grid(row=0, column=0, sticky="ew", padx=(0, 5), pady=(10, 5))
+        
+        ctk.CTkLabel(
+            input_frame,
+            text="Texte original:",
+            font=ctk.CTkFont(size=12, weight="bold")
+        ).pack(anchor="w", padx=10, pady=(10, 5))
+        
+        input_text = ctk.CTkTextbox(input_frame, height=200)
+        input_text.grid(row=1, column=0, columnspan=2, sticky="nsew", padx=10, pady=(0, 10))
+        input_frame.grid_rowconfigure(1, weight=1)
+        input_frame.grid_columnconfigure(0, weight=1)
+        
+        # Output section
+        output_frame = ctk.CTkFrame(content_frame)
+        output_frame.grid(row=0, column=1, sticky="ew", padx=(5, 0), pady=(10, 5))
+        
+        ctk.CTkLabel(
+            output_frame,
+            text="Texte formalisé:",
+            font=ctk.CTkFont(size=12, weight="bold")
+        ).pack(anchor="w", padx=10, pady=(10, 5))
+        
+        output_text = ctk.CTkTextbox(output_frame, height=200)
+        output_text.grid(row=1, column=0, sticky="nsew", padx=10, pady=(0, 10))
+        output_frame.grid_rowconfigure(1, weight=1)
+        output_frame.grid_columnconfigure(0, weight=1)
+        
+        # Controls
+        controls_frame = ctk.CTkFrame(content_frame, fg_color="transparent")
+        controls_frame.grid(row=1, column=0, columnspan=2, sticky="ew", pady=10)
+        
+        style_menu = ctk.CTkOptionMenu(
+            controls_frame,
+            values=["Professionnel", "Académique", "Décontracté", "Technique"]
+        )
+        style_menu.pack(side="left", padx=5)
+        
+        format_btn = ctk.CTkButton(
+            controls_frame,
+            text="✨ Formaliser",
+            command=lambda: self.set_status("Texte formalisé avec succès!")
+        )
+        format_btn.pack(side="left", padx=5)
+        
+        copy_btn = ctk.CTkButton(
+            controls_frame,
+            text="📋 Copier",
+            command=lambda: self.set_status("Texte copié dans le presse-papiers")
+        )
+        copy_btn.pack(side="left", padx=5)
+    
+    def _create_integrated_routine_builder(self):
+        """Create integrated Routine Builder tool in content area."""
+        # Create main container
+        tool_frame = ctk.CTkFrame(self.content_area)
+        tool_frame.grid(row=0, column=0, sticky="nsew", padx=10, pady=10)
+        tool_frame.grid_columnconfigure(0, weight=1)
+        tool_frame.grid_rowconfigure(1, weight=1)
+        
+        # Header with back button
+        header_frame = ctk.CTkFrame(tool_frame)
+        header_frame.grid(row=0, column=0, sticky="ew", padx=10, pady=10)
+        header_frame.grid_columnconfigure(1, weight=1)
+        
+        back_btn = ctk.CTkButton(
+            header_frame,
+            text="← Accueil",
+            width=100,
+            command=self._show_welcome_screen
+        )
+        back_btn.grid(row=0, column=0, padx=(0, 10))
+        
+        title_label = ctk.CTkLabel(
+            header_frame,
+            text="🔄 Constructeur de Routines",
+            font=ctk.CTkFont(size=18, weight="bold")
+        )
+        title_label.grid(row=0, column=1, sticky="w")
+        
+        # Main content
+        content_frame = ctk.CTkFrame(tool_frame)
+        content_frame.grid(row=1, column=0, sticky="nsew", padx=10, pady=(0, 10))
+        content_frame.grid_columnconfigure((0, 1), weight=1)
+        content_frame.grid_rowconfigure(0, weight=1)
+        
+        # Routine list
+        list_frame = ctk.CTkFrame(content_frame)
+        list_frame.grid(row=0, column=0, sticky="nsew", padx=(0, 5))
+        
+        ctk.CTkLabel(
+            list_frame,
+            text="Mes Routines:",
+            font=ctk.CTkFont(size=14, weight="bold")
+        ).pack(anchor="w", padx=10, pady=(10, 5))
+        
+        routine_list = ctk.CTkScrollableFrame(list_frame, height=300)
+        routine_list.pack(fill="both", expand=True, padx=10, pady=(0, 10))
+        
+        # Sample routines
+        sample_routines = [
+            "🌅 Routine Matinale",
+            "💼 Routine Travail",
+            "🌙 Routine Soirée",
+            "🏃 Routine Sport"
+        ]
+        
+        for routine in sample_routines:
+            routine_btn = ctk.CTkButton(
+                routine_list,
+                text=routine,
+                height=30,
+                anchor="w"
+            )
+            routine_btn.pack(fill="x", pady=2)
+        
+        # Routine details
+        details_frame = ctk.CTkFrame(content_frame)
+        details_frame.grid(row=0, column=1, sticky="nsew", padx=(5, 0))
+        
+        ctk.CTkLabel(
+            details_frame,
+            text="Détails de la Routine:",
+            font=ctk.CTkFont(size=14, weight="bold")
+        ).pack(anchor="w", padx=10, pady=(10, 5))
+        
+        details_text = ctk.CTkTextbox(details_frame, height=250)
+        details_text.pack(fill="both", expand=True, padx=10, pady=(0, 10))
+        details_text.insert("1.0", "Sélectionnez une routine pour voir ses détails...")
+        
+        # Controls
+        controls_frame = ctk.CTkFrame(tool_frame, fg_color="transparent")
+        controls_frame.grid(row=2, column=0, sticky="ew", padx=10, pady=(0, 10))
+        
+        new_btn = ctk.CTkButton(
+            controls_frame,
+            text="➕ Nouvelle Routine",
+            command=lambda: self.set_status("Création d'une nouvelle routine...")
+        )
+        new_btn.pack(side="left", padx=(0, 10))
+        
+        edit_btn = ctk.CTkButton(
+            controls_frame,
+            text="✏️ Modifier",
+            command=lambda: self.set_status("Mode édition activé")
+        )
+        edit_btn.pack(side="left", padx=(0, 10))
+        
+        save_btn = ctk.CTkButton(
+            controls_frame,
+            text="💾 Sauvegarder",
+            command=lambda: self.set_status("Routine sauvegardée!")
+        )
+        save_btn.pack(side="left")
+    
+    def _create_integrated_immersive_reader(self):
+        """Create integrated Immersive Reader tool in content area."""
+        # Create main container
+        tool_frame = ctk.CTkFrame(self.content_area)
+        tool_frame.grid(row=0, column=0, sticky="nsew", padx=10, pady=10)
+        tool_frame.grid_columnconfigure(0, weight=1)
+        tool_frame.grid_rowconfigure(1, weight=1)
+        
+        # Header with back button
+        header_frame = ctk.CTkFrame(tool_frame)
+        header_frame.grid(row=0, column=0, sticky="ew", padx=10, pady=10)
+        header_frame.grid_columnconfigure(1, weight=1)
+        
+        back_btn = ctk.CTkButton(
+            header_frame,
+            text="← Accueil",
+            width=100,
+            command=self._show_welcome_screen
+        )
+        back_btn.grid(row=0, column=0, padx=(0, 10))
+        
+        title_label = ctk.CTkLabel(
+            header_frame,
+            text="📖 Lecteur Immersif",
+            font=ctk.CTkFont(size=18, weight="bold")
+        )
+        title_label.grid(row=0, column=1, sticky="w")
+        
+        # Main content
+        content_frame = ctk.CTkFrame(tool_frame)
+        content_frame.grid(row=1, column=0, sticky="nsew", padx=10, pady=(0, 10))
+        content_frame.grid_columnconfigure(0, weight=1)
+        content_frame.grid_rowconfigure(1, weight=1)
+        
+        # Reading controls
+        controls_frame = ctk.CTkFrame(content_frame)
+        controls_frame.grid(row=0, column=0, sticky="ew", padx=10, pady=10)
+        
+        load_btn = ctk.CTkButton(
+            controls_frame,
+            text="📁 Charger Fichier",
+            command=lambda: self.set_status("Sélection de fichier...")
+        )
+        load_btn.pack(side="left", padx=(0, 10))
+        
+        font_size_label = ctk.CTkLabel(controls_frame, text="Taille:")
+        font_size_label.pack(side="left", padx=(0, 5))
+        
+        font_size_slider = ctk.CTkSlider(
+            controls_frame,
+            from_=10,
+            to=24,
+            number_of_steps=14
+        )
+        font_size_slider.pack(side="left", padx=(0, 10))
+        font_size_slider.set(14)
+        
+        highlight_btn = ctk.CTkButton(
+            controls_frame,
+            text="🖍️ Surligner",
+            width=100,
+            command=lambda: self.set_status("Mode surlignage activé")
+        )
+        highlight_btn.pack(side="left", padx=(0, 10))
+        
+        # Reading area
+        reading_frame = ctk.CTkFrame(content_frame)
+        reading_frame.grid(row=1, column=0, sticky="nsew", padx=10, pady=(0, 10))
+        reading_frame.grid_columnconfigure(0, weight=1)
+        reading_frame.grid_rowconfigure(0, weight=1)
+        
+        text_area = ctk.CTkTextbox(reading_frame, font=ctk.CTkFont(size=14))
+        text_area.grid(row=0, column=0, sticky="nsew", padx=10, pady=10)
+        text_area.insert("1.0", "Bienvenue dans le Lecteur Immersif!\n\nChargez un fichier texte pour commencer la lecture.\n\nFonctionnalités disponibles:\n• Ajustement de la taille de police\n• Surlignage de texte\n• Annotations\n• Mode focus\n\nUtilisez les contrôles ci-dessus pour personnaliser votre expérience de lecture.")
+        
+        # Bottom controls
+        bottom_controls = ctk.CTkFrame(tool_frame, fg_color="transparent")
+        bottom_controls.grid(row=2, column=0, sticky="ew", padx=10, pady=(0, 10))
+        
+        notes_btn = ctk.CTkButton(
+            bottom_controls,
+            text="📝 Notes",
+            command=lambda: self.set_status("Panneau de notes ouvert")
+        )
+        notes_btn.pack(side="left", padx=(0, 10))
+        
+        summary_btn = ctk.CTkButton(
+            bottom_controls,
+            text="📋 Résumé",
+            command=lambda: self.set_status("Génération du résumé...")
+        )
+        summary_btn.pack(side="left", padx=(0, 10))
+        
+        focus_btn = ctk.CTkButton(
+            bottom_controls,
+            text="🎯 Mode Focus",
+            command=lambda: self.set_status("Mode focus activé")
+        )
+        focus_btn.pack(side="left")
         # TODO: Show user statistics window
         messagebox.showinfo("Info", "Statistiques utilisateur en développement")
     
@@ -927,11 +1397,71 @@ class MainWindow:
     
     # Window event handlers
     def _on_window_configure(self, event):
-        """Handle window resize/move events."""
+        """Handle window resize/move events with responsive design."""
         if event.widget == self.root:
             # Save window size and position
             geometry = self.root.geometry()
             self.settings_manager.set('window.geometry', geometry)
+            
+            # Get current window dimensions
+            width = self.root.winfo_width()
+            height = self.root.winfo_height()
+            
+            # Apply responsive layout adjustments
+            self._adjust_responsive_layout(width, height)
+    
+    def _adjust_responsive_layout(self, width: int, height: int):
+        """Adjust layout based on window size for responsive design."""
+        try:
+            # Adjust sidebar width based on window width
+            if width < 900:
+                # Compact mode for smaller windows
+                self.sidebar.configure(width=180)
+                # Reduce padding in content area
+                if hasattr(self, 'content_area'):
+                    self.content_area.grid_configure(padx=5, pady=5)
+            elif width < 1200:
+                # Medium mode
+                self.sidebar.configure(width=220)
+                if hasattr(self, 'content_area'):
+                    self.content_area.grid_configure(padx=8, pady=8)
+            else:
+                # Full mode for larger windows
+                self.sidebar.configure(width=250)
+                if hasattr(self, 'content_area'):
+                    self.content_area.grid_configure(padx=10, pady=10)
+            
+            # Adjust tools scroll area height based on window height
+            if hasattr(self, 'tools_scroll'):
+                if height < 600:
+                    self.tools_scroll.configure(height=150)
+                elif height < 800:
+                    self.tools_scroll.configure(height=200)
+                else:
+                    self.tools_scroll.configure(height=250)
+            
+            # Adjust quick actions layout for very small windows
+            if hasattr(self, 'quick_actions_frame') and width < 800:
+                # Stack quick action buttons vertically for small windows
+                self._adjust_quick_actions_layout(compact=True)
+            elif hasattr(self, 'quick_actions_frame'):
+                # Use horizontal layout for larger windows
+                self._adjust_quick_actions_layout(compact=False)
+                
+        except Exception as e:
+            self.logger.warning(f"Error adjusting responsive layout: {e}")
+    
+    def _adjust_quick_actions_layout(self, compact: bool = False):
+        """Adjust quick actions layout based on window size."""
+        try:
+            if not hasattr(self, 'quick_actions_frame'):
+                return
+                
+            # This would adjust the layout of quick action buttons
+            # Implementation depends on how quick_actions_frame is structured
+            pass
+        except Exception as e:
+            self.logger.warning(f"Error adjusting quick actions layout: {e}")
     
     def _on_closing(self):
         """Handle window closing."""

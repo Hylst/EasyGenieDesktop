@@ -32,17 +32,7 @@ class TaskBreakerTool(BaseToolWindow):
                  settings_manager=None, ai_service=None, audio_service=None, 
                  database_manager=None, **kwargs):
         """Initialize Task Breaker tool."""
-        super().__init__(
-            parent, 
-            "Task Breaker", 
-            magic_energy_level,
-            settings_manager,
-            ai_service,
-            audio_service,
-            database_manager,
-            **kwargs
-        )
-        
+        # Initialize tool-specific attributes BEFORE calling super()
         # Task data
         self.current_task = None
         self.subtasks = []
@@ -51,7 +41,10 @@ class TaskBreakerTool(BaseToolWindow):
         try:
             self.templates = self._load_templates()
         except Exception as e:
-            self.logger.error(f"Failed to load templates: {e}")
+            # Create a basic logger for this error since parent logger isn't available yet
+            import logging
+            logger = logging.getLogger(self.__class__.__name__)
+            logger.error(f"Failed to load templates: {e}")
             self.templates = {
                 "Projet Simple": [
                     "Définir les objectifs",
@@ -67,6 +60,18 @@ class TaskBreakerTool(BaseToolWindow):
         
         # UI state
         self.selected_subtask = None
+        
+        # Now call parent initialization
+        super().__init__(
+            parent, 
+            "Task Breaker", 
+            magic_energy_level,
+            settings_manager,
+            ai_service,
+            audio_service,
+            database_manager,
+            **kwargs
+        )
         
         self.logger.info("Task Breaker tool initialized")
     
